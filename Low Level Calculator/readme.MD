@@ -26,7 +26,8 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 |Pengurangan(-)                |      |
 |Perkalian(x)                  |      |
 |Pembagian(/)                  |      |
-|I/O                           |      |
+|I/O                           |  V   |
+|Parser                        |      |
 |Pangkat(^)                    |      |
 |1/sqrt(x)                     |      |
 |Berkas:Source Code            |      |
