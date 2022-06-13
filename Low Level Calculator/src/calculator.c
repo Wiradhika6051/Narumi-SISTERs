@@ -11,7 +11,9 @@ bool Equal(int num1,int num2);//mengembalikan true apabila num1==num2, selain it
 bool NotEqual(int num1,int num2);//mengembalikan true apabila num1!=num2, selain itu false
 bool Not(int num);//logical not -> !0xf==0, !0x0==1,!0xd==0
 bool Greater(int num1,int num2);//num1>num2 == true, selain itu false
-bool GreaterEqual(int num1,int num2);//num1 >=num2 == true, selain itu false;
+bool GreaterEqual(int num1,int num2);//num1 >=num2 == true, selain itu false
+bool Lesser(int num1,int num2);//num1<num2==true, selain itu false
+bool LesserEqual(int num1,int num2);//num1 <=num2 == true, selain itu false
 int add(int num1,int num2);//num1+num2
 
 int main(){
@@ -89,6 +91,13 @@ bool Greater(int num1,int num2){
 bool GreaterEqual(int num1,int num2){
     //return true bila num1>num2 ATAU num1==num2
     return Greater(num1,num2) | Equal(num1,num2);
+}
+bool Lesser(int num1,int num2){
+    return Greater(num2,num1);//kalau num2>num1, maka num1< num2 yang menghasilkan true
+}
+bool GreaterEqual(int num1,int num2){
+    //return true bila num1<num2 ATAU num1==num2
+    return Lesser(num1,num2) | Equal(num1,num2);
 }
 int add(int num1,int num2){
     int result = num1 ^ num2;
