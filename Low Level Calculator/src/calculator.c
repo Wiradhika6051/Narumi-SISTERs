@@ -32,7 +32,8 @@ int main(){
     while(true){
         printf("Masukkan persamaan yang ingin diselesaikan. Pisahkan antar operand dan operator dengan spasi\n");
         printf("Contoh: \"200 + 30 / -300\"\n");
-        printf("Operator yang valid: +,-,*,/,^");
+        printf("Operator yang valid: +,-,*,/,^\n");
+        printf("Persamaan:");
         fgets(buffer,BUFFER_SIZE,stdin);
         printf("Hasil Operasi: %d\n",solve(buffer));
         printf("Apakah Anda ingin melanjutkan perhitungan?(Y/N)\n");
@@ -62,7 +63,6 @@ int solve(char* buffer){
     while(NotEqual(buffer[i],0x0)){//selama isi buffernya gak \0
         //skip spasi
         while(Equal(buffer[i],' ')){
-       //     if(NotEqual(operator,NIL) & op1Filled & op2Filled){
             if(isNegatif){
                 if(Equal(curPos,KANAN)){
                     operandKanan = kali(operandKanan,-1);
@@ -78,9 +78,10 @@ int solve(char* buffer){
             }
             if(isNeedProcessed){
                 //proses operasi
-                result = tambah(result,compute(result,operator,operandKanan));
+                result = compute(result,operator,operandKanan);
                 isNeedProcessed = false;
                 operator = NIL;
+                operandKanan = 0;
             }
             i = tambah(i,1);
         }
@@ -109,21 +110,13 @@ int solve(char* buffer){
         }
         //ketemu operator
         else if(Equal(buffer[i],'+') | Equal(buffer[i],'*') | Equal(buffer[i],'/') | Equal(buffer[i],'^')){
-            //if(NotEqual(operator,NIL)){
-                //kalau operator!=NIL, maka ada operasi yang harus berjalan
-            //    result = tambah(result,compute(op1,operator,op2));
-                //reset operasi
-            //    operator = NIL;
-            //    op1 = result;
-            //    op2 = 0;
-           // }
             operator= buffer[i];
         }
         i = tambah(i,1);
     }
     if(isNeedProcessed){
         //periksa operasi terakhir
-        result = tambah(result,compute(result,operator,operandKanan));
+        result = compute(result,operator,operandKanan);
     }
     return result;
 }
@@ -144,7 +137,8 @@ bool NotEqual(int num1,int num2){
     return Not(Equal(num1,num2));//num1!=num2
 }
 bool Not(int num){
-    return tambah((num>>31)|((~num+1)>>31),1);
+//    printf("angka: %d\n",tambah(~num,1));
+    return tambah((num>>31)|((tambah(~num,1))>>31),1);
     //sama aja dengan : (num>>31 | -num>>31)+1
     // OR antara signed bit + dan - bilangan tersebut, kalau salah satunya angka 1, maka hasilnya adalah 0xff.ff yang kalau 
     //ditambah 1 pasti hasilnya 0. Satu satunya cara biar hasilnya gak 0 yakni bila hasil OR nya bukan 0xfffff yang 
@@ -165,21 +159,25 @@ bool GreaterEqual(int num1,int num2){
 bool Lesser(int num1,int num2){
     return Greater(num2,num1);//kalau num2>num1, maka num1< num2 yang menghasilkan true
 }
-bool GreaterEqual(int num1,int num2){
+bool LesserEqual(int num1,int num2){
     //return true bila num1<num2 ATAU num1==num2
     return Lesser(num1,num2) | Equal(num1,num2);
 }
 int tambah(int num1,int num2){
     int result=0;
     int carry = 0;
-loop:
-    result = tambah(result,num1 ^ num2);
-    carry = tambah(carry,(num1 & num2)<<1);
-    if(isEqual(carry,0x0)){
+    int temp;
+    result = num1 ^ num2;
+    carry = (num1 & num2)<<1;
+check:
+    if(Equal(carry,0x0)){
         //rekursifnya kelar
         return result;
     }
-    goto loop;
+    temp = result ^ carry;
+    carry = (result & carry) <<1;
+    result = temp;
+    goto check;
 }
 int kali(int num1,int num2){
     return num1*num2;

@@ -22,12 +22,12 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 # Tabel Pengerjaan
 |          Task                |Status|
 |------------------------------|------|
-|Penjumlahan(+)                |      |
+|Penjumlahan(+)                |  V   |
 |Pengurangan(-)                |      |
 |Perkalian(x)                  |      |
 |Pembagian(/)                  |      |
 |I/O                           |  V   |
-|Parser                        |      |
+|Parser                        |  V   |
 |Pangkat(^)                    |      |
 |1/sqrt(x)                     |      |
 |Berkas:Source Code            |      |
