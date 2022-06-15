@@ -23,7 +23,7 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 |          Task                |Status|
 |------------------------------|------|
 |Penjumlahan(+)                |  V   |
-|Pengurangan(-)                |      |
+|Pengurangan(-)                |  V   |
 |Perkalian(x)                  |      |
 |Pembagian(/)                  |      |
 |I/O                           |  V   |

@@ -20,6 +20,7 @@ bool GreaterEqual(int num1,int num2);//num1 >=num2 == true, selain itu false
 bool Lesser(int num1,int num2);//num1<num2==true, selain itu false
 bool LesserEqual(int num1,int num2);//num1 <=num2 == true, selain itu false
 int tambah(int num1,int num2);//num1+num2
+int kurang(int num1,int num2);//num1-num2
 int CharToInteger(char c);
 
 //TODO
@@ -114,6 +115,16 @@ int solve(char* buffer){
         }
         i = tambah(i,1);
     }
+    if(isNegatif){
+        //buat ngehandle kalau token terakhirnya negatif
+        if(Equal(curPos,KANAN)){
+            operandKanan = kali(operandKanan,-1);
+        }
+        else{
+            result = kali(result,-1);
+        }
+        isNegatif = false;
+    }
     if(isNeedProcessed){
         //periksa operasi terakhir
         result = compute(result,operator,operandKanan);
@@ -121,9 +132,13 @@ int solve(char* buffer){
     return result;
 }
 int compute(int op1,char operator,int op2){
-    if(Equal(operator,'+')){
-        //penjumlahan
-        return tambah(op1,op2);
+    switch(operator){
+        case '+':
+            return tambah(op1,op2);
+        case '-':
+            return kurang(op1,op2);
+        default:
+            return 0;
     }
 }
 bool Equal(int num1,int num2){
@@ -178,6 +193,23 @@ check:
     carry = (result & carry) <<1;
     result = temp;
     goto check;
+}
+int kurang(int num1,int num2){
+    int result = 0;
+    int borrow = 0;
+    int temp;
+    printf("%d %d\n",num1,num2);
+    result = num1 ^ num2;
+    borrow = (~num1 & num2) << 1;//borrow bernilai 1 apabila bit di num1 nya 0 tapi bit di num2 nya 1
+loopkurang:
+    if(Equal(borrow,0x0)){
+        //rekursifnya kelar
+        return result;
+    }
+    temp = result ^ borrow;
+    borrow =  (~result & borrow) << 1;
+    result = temp;
+    goto loopkurang;
 }
 int kali(int num1,int num2){
     return num1*num2;
