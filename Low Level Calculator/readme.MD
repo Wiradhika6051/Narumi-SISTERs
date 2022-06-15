@@ -1,5 +1,5 @@
 # Low Level Calculator
-![gambar](https://github.com/Wiradhika6051/Narumi-SISTERs/blob/main/Low%20Level%20Calculator/bg-llc.PNG)
+![gambar](bg-llc.PNG)
 
 # Ketentuan
 Membuat sebuah kalkulator menggunakan bahasa C, C++, atau Rust yang hanya bolehmenggunakan operator bitwise: &, |, ^, ~, <<, >>, >>>. Operand adalah integer 4 byte.
