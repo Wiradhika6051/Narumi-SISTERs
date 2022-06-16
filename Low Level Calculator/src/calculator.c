@@ -21,11 +21,10 @@ bool Lesser(int num1,int num2);//num1<num2==true, selain itu false
 bool LesserEqual(int num1,int num2);//num1 <=num2 == true, selain itu false
 int tambah(int num1,int num2);//num1+num2
 int kurang(int num1,int num2);//num1-num2
+int kali(int num1,int num2);//num1*num2
+int bagi(int num1,int num2);//num1 / num2 (int)
 int CharToInteger(char c);
 int abs(int x);//nilai mutlak
-
-//TODO
-int kali(int num1,int num2);//num1*num2
 
 int main(){
     char buffer[BUFFER_SIZE];
@@ -140,6 +139,8 @@ int compute(int op1,char operator,int op2){
             return kurang(op1,op2);
         case '*':
             return kali(op1,op2);
+        case '/':
+            return bagi(op1,op2);
         default:
             return 0;
     }
@@ -238,6 +239,25 @@ loopkali:
     num1 <<=1;
     num2 >>=1;
     goto loopkali;
+}
+int bagi(int num1,int num2){
+    int counter = 0;
+    int signbit = (num1>>31) ^ (num2>>31);//kalau nilai sign bit nya beda maka negatif (1), kalo sama maka positif(0)
+    num2 = abs(num2);
+    num1 = abs(num1);
+loopbagi:
+    if(Lesser(num1,num2)){
+        if(Equal(signbit,0)){
+            //sign nya positif
+            return counter;
+        }
+        //negatif atau 0, jadi -sum.  -sum = 0 - sum
+        return kurang(0,counter);
+    }
+    num1 = kurang(num1,num2);
+    counter = tambah(counter,1);
+    goto loopbagi;
+    
 }
 int CharToInteger(char c){
     return c-48;
