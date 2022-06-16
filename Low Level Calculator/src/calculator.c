@@ -22,6 +22,7 @@ bool LesserEqual(int num1,int num2);//num1 <=num2 == true, selain itu false
 int tambah(int num1,int num2);//num1+num2
 int kurang(int num1,int num2);//num1-num2
 int CharToInteger(char c);
+int abs(int x);//nilai mutlak
 
 //TODO
 int kali(int num1,int num2);//num1*num2
@@ -137,6 +138,8 @@ int compute(int op1,char operator,int op2){
             return tambah(op1,op2);
         case '-':
             return kurang(op1,op2);
+        case '*':
+            return kali(op1,op2);
         default:
             return 0;
     }
@@ -198,7 +201,6 @@ int kurang(int num1,int num2){
     int result = 0;
     int borrow = 0;
     int temp;
-    printf("%d %d\n",num1,num2);
     result = num1 ^ num2;
     borrow = (~num1 & num2) << 1;//borrow bernilai 1 apabila bit di num1 nya 0 tapi bit di num2 nya 1
 loopkurang:
@@ -212,8 +214,37 @@ loopkurang:
     goto loopkurang;
 }
 int kali(int num1,int num2){
-    return num1*num2;
+    //jadi karena ini main bit-bitan, perkalian paling jelas sih pake shift operator.
+    //Karena shift operator basic nya ialah bagi/kali 2 maka aturannya sebagai berikut:
+    //num2 genap: num1*num2 = (num1*2)*(num2/2)
+    //num2 ganjil: num1*num2 = (num1*2)*(num2/2)+num1
+    int sum = 0;
+    int signbit = (num1>>31) ^ (num2>>31);//kalau nilai sign bit nya beda maka negatif (1), kalo sama maka positif(0)
+    num2 = abs(num2);
+    num1 = abs(num1);
+loopkali:
+    if(LesserEqual(num2,0)){
+        if(Equal(signbit,0)){
+            //sign nya positif
+            return sum;
+        }
+        //negatif atau 0, jadi -sum.  -sum = 0 - sum
+        return kurang(0,sum);
+    }
+    if(num2 & 0x1){
+        //num2 ganjil
+        sum  = tambah(sum,num1);
+    }
+    num1 <<=1;
+    num2 >>=1;
+    goto loopkali;
 }
 int CharToInteger(char c){
     return c-48;
+}
+int abs(int x){
+    if(GreaterEqual(x,0)){
+        return x;
+    }
+    return kurang(0,x);
 }

@@ -24,7 +24,7 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 |------------------------------|------|
 |Penjumlahan(+)                |  V   |
 |Pengurangan(-)                |  V   |
-|Perkalian(x)                  |      |
+|Perkalian(x)                  |  V   |
 |Pembagian(/)                  |      |
 |I/O                           |  V   |
 |Parser                        |  V   |
