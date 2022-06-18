@@ -7,6 +7,7 @@
 #define MAX_INT 0xffffffff
 #define NIL '\0'
 
+
 //enum buat ngecek operan mana yang sedang dicek
 enum posisi{KIRI,KANAN};
 
@@ -23,6 +24,7 @@ int tambah(int num1,int num2);//num1+num2
 int kurang(int num1,int num2);//num1-num2
 int kali(int num1,int num2);//num1*num2
 int bagi(int num1,int num2);//num1 / num2 (int)
+int pangkat(int basis, int eksponen);// (basis) ^ eksponen (perpangkatan)
 int CharToInteger(char c);
 int abs(int x);//nilai mutlak
 
@@ -64,6 +66,7 @@ int solve(char* buffer){
     while(NotEqual(buffer[i],0x0)){//selama isi buffernya gak \0
         //skip spasi
         while(Equal(buffer[i],' ')){
+
             if(isNegatif){
                 if(Equal(curPos,KANAN)){
                     operandKanan = kali(operandKanan,-1);
@@ -88,7 +91,7 @@ int solve(char* buffer){
         }
         isParseStarted = true;
         //berupa angka 0-9
-        if(GreaterEqual(buffer[i],48) & LesserEqual(buffer[1],57)){
+        if(GreaterEqual(buffer[i],48) & LesserEqual(buffer[i],57)){
             if(Equal(curPos,KIRI)){
                 result= tambah(kali(result,10),CharToInteger(buffer[i]));//operand kiri
             }
@@ -141,6 +144,8 @@ int compute(int op1,char operator,int op2){
             return kali(op1,op2);
         case '/':
             return bagi(op1,op2);
+        case '^':
+            return pangkat(op1,op2);
         default:
             return 0;
     }
@@ -156,7 +161,6 @@ bool NotEqual(int num1,int num2){
     return Not(Equal(num1,num2));//num1!=num2
 }
 bool Not(int num){
-//    printf("angka: %d\n",tambah(~num,1));
     return tambah((num>>31)|((tambah(~num,1))>>31),1);
     //sama aja dengan : (num>>31 | -num>>31)+1
     // OR antara signed bit + dan - bilangan tersebut, kalau salah satunya angka 1, maka hasilnya adalah 0xff.ff yang kalau 
@@ -258,6 +262,55 @@ loopbagi:
     counter = tambah(counter,1);
     goto loopbagi;
     
+}
+int pangkat(int basis, int eksponen){
+    //ada 2 kasus: eksponen >=0 dan eksponen <0
+    int result = 1;//eksponen==0, hasilnya 1
+cekpangkat:
+    if(Equal(basis,1)){
+        //jika basisnya 1 hasilnya selalu 1
+        return 1;
+    }
+    if(Equal(eksponen,0)){
+        //hasilnya sudah ketemu
+        return result;
+    }
+    if(Equal(basis,-1)){
+        //kalau basisnya -1, jika eksponennya >0 maka bila ekponennya genap, hasilnya 1 selain itu -1
+        if(Greater(eksponen,0)){
+            return eksponen & 0x1 ? -1 : 1;
+        }
+        else{
+            //kalau negatif kebalikannya
+            return eksponen & 0x1 ? 1 : -1;
+        }
+    }
+    if(Greater(eksponen,0)){
+        //pangkat > 0
+        goto positif;
+    }
+    if(Lesser(eksponen,0)){
+        //eksponen < 0
+        if(Equal(eksponen,-1)){
+            //eksponen == -1, return selalu 1 kecuali bila basisnya 0 akan jadi -infinity
+            if(Equal(basis,0)){
+                return -1.0/0.0;//NaN
+            }
+            return 1;
+        }
+        //selain itu hasilnya 0.000 jadi return 0 aja
+        return 0;
+    }
+positif:
+    //kasus 1: eksponen >=0
+    //jika eksponennya ganjil(LSB nya 1), maka result dikalikan dengan basis
+    if(eksponen & 0x1){
+        result = kali(result,basis);
+    }
+    basis = kali(basis,basis);
+    //2^n * 2^n = 2^2n, maka eksponennya dibagi 2
+    eksponen >>= 1;
+    goto cekpangkat;
 }
 int CharToInteger(char c){
     return c-48;

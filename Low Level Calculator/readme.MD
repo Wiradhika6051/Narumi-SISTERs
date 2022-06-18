@@ -2,7 +2,7 @@
 ![gambar](bg-llc.PNG)
 
 # Ketentuan
-Membuat sebuah kalkulator menggunakan bahasa C atau C++ yang hanya bolehmenggunakan operator bitwise: &, |, ^, ~, <<, >>, >>>. Operand adalah integer 4 byte.
+Membuat sebuah kalkulator menggunakan bahasa C atau C++ yang hanya boleh menggunakan operator bitwise: &, |, ^, ~, <<, >>, >>>. Operand adalah integer 4 byte.
 Kalkulator harus dapat melakukan operasi:
 - Penjumlahan
 - Pengurangan
@@ -29,7 +29,7 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 |Pembagian(/)                  |  V   |
 |I/O                           |  V   |
 |Parser                        |  V   |
-|Pangkat(^)                    |      |
+|Pangkat(^)                    |  V   |
 |1/sqrt(x)                     |      |
 |Berkas:Source Code            |      |
 |Berkas:dokumen:cara penggunaan|      |
