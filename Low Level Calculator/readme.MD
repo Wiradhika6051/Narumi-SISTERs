@@ -33,4 +33,4 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 |1/sqrt(x)                     |      |
 |Berkas:Source Code            |  V   |
 |Berkas:dokumen:cara penggunaan|  V   |
-|Berkas:dokumen:hasil percobaan|      |
+|Berkas:dokumen:hasil percobaan|  V   |
