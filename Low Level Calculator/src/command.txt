@@ -1,2 +1,2 @@
-gcc -o ../bin/calculator calculator.c
-../bin/calculator
+gcc -o ../bin/kalbit calculator.c
+../bin/kalbit

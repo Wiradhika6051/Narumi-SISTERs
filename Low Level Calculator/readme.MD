@@ -31,6 +31,6 @@ Implementasi tidak boleh menggunakan keyword while dan for, tetapi goto dan labe
 |Parser                        |  V   |
 |Pangkat(^)                    |  V   |
 |1/sqrt(x)                     |      |
-|Berkas:Source Code            |      |
-|Berkas:dokumen:cara penggunaan|      |
+|Berkas:Source Code            |  V   |
+|Berkas:dokumen:cara penggunaan|  V   |
 |Berkas:dokumen:hasil percobaan|      |
