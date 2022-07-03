@@ -1,0 +1,1 @@
+g++ targetprogram.cpp -o targetprogram.exe

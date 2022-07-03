@@ -1,0 +1,9 @@
+make.exe -f c:\Users\anugr\Narumi-SISTERs\src --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory `c:/Users/anugr/Narumi-SISTERs'
+make.exe: Leaving directory `c:/Users/anugr/Narumi-SISTERs'
+ 
+make.exe: c:\Users\anugr\Narumi-SISTERs\src: No such file or directory
+make.exe: *** No rule to make target `c:\Users\anugr\Narumi-SISTERs\src'.
+make.exe: Failed to remake makefile `c:\Users\anugr\Narumi-SISTERs\src'.
+make.exe: *** No targets specified and no makefile found.  Stop.
+
