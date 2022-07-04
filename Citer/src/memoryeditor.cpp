@@ -127,6 +127,17 @@ int main() {
 		BOOL statusTulis = true;
 		if (tipedata == "int") {
 			bytesSize = 4;
+			int value;
+			statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)&value, bytesSize, &bytesRead);
+			if (statusBaca) {
+				_tprintf(_T("Pembacaan memori pada alamat 0x%I64x Sukses! Nilai yang dibaca: 0x%x\n"), addrMemoriTarget, value);
+				_tprintf(_T("Jumlah bytes terbaca: %d\n"), bytesRead);
+			}
+			//ubah nilainya
+			std::cout << "Masukkan nilai baru: ";
+			std::cin >> value;
+			//tulis ke memori
+			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)&value, sizeof(int), &bytesWrite);
 		}
 		else if (tipedata == "char") {
 			bytesSize = 1;
@@ -151,14 +162,14 @@ int main() {
 			CHAR* nilaiBaru = A2T(newVal);
 			//tulis ke memori
 			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)nilaiBaru, strlen(nilaiBaru)+1, &bytesWrite);
-			if (statusTulis) {
-				_tprintf(_T("Penulisan ke memori pada alamat 0x%I64x Sukses!\n"), addrMemoriTarget);
-				_tprintf(_T("Jumlah bytes yang ditulis: %d\n"), bytesWrite);
-			}
 		}
 		if (!statusBaca) {
 			//jika gagal
 			_tprintf(_T("Pembacaan memori pada alamat 0x%I64x gagal!\n"), addrMemoriTarget);
+		}
+		if (statusTulis) {
+			_tprintf(_T("Penulisan ke memori pada alamat 0x%I64x Sukses!\n"), addrMemoriTarget);
+			_tprintf(_T("Jumlah bytes yang ditulis: %d\n"), bytesWrite);
 		}
 		else if (!statusTulis) {
 			//jika gagal
