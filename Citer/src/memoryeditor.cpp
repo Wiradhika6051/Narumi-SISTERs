@@ -4,12 +4,15 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <psapi.h>
+#include<TlHelp32.h>
+#include<shlwapi.h>
 #include "atlstr.h"
 #pragma comment(lib, "psapi.lib")
 DWORD* getListOfProcessId(DWORD& processCount);
+DWORD GetModuleBaseAddress(TCHAR* lpszModuleName, DWORD pID);
 void print_ps_name(DWORD pid) {
 	TCHAR pname[MAX_PATH] = TEXT("<unknown>");
-	HANDLE phandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+	HANDLE phandle = OpenProcess(PROCESS_VM_READ, FALSE, pid);
 	if (phandle != NULL) {
 		HMODULE pmod;
 		DWORD temp;
@@ -22,7 +25,7 @@ void print_ps_name(DWORD pid) {
 void print_ps() {
 	DWORD ps_ctr = 0;
 	DWORD* ps_list = getListOfProcessId(ps_ctr);
-	for (int i = 0; i < ps_ctr; i++)
+	for (DWORD i = 0; i < ps_ctr; i++)
 		if (ps_list[i] != 0)
 			print_ps_name(ps_list[i]);
 }
@@ -39,9 +42,9 @@ HANDLE getProcess(TCHAR* name,DWORD& pid_) {
 	HANDLE phandle;
 	TCHAR pname[MAX_PATH] = TEXT("<unknown>");
 	if (processIdList != NULL) {
-		for (int i = 0; i < p_count; i++) {
+		for (DWORD i = 0; i < p_count; i++) {
 			if (processIdList[i] != 0) {
-				phandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processIdList[i]);
+				phandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, processIdList[i]);
 				if (phandle != NULL) {
 					HMODULE pmod;
 					DWORD temp;
@@ -57,10 +60,32 @@ HANDLE getProcess(TCHAR* name,DWORD& pid_) {
 	}
 	return NULL;
 }
+DWORD GetModuleBaseAddress(TCHAR* lpszModuleName, DWORD pID) {
+	//buat nyari base address dari modul/aplikasi tertentu
+	DWORD dwModuleBaseAddress = 0;
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pID); 
+	MODULEENTRY32 ModuleEntry32 = { 0 };
+	ModuleEntry32.dwSize = sizeof(MODULEENTRY32);
+
+	if (Module32First(hSnapshot, &ModuleEntry32)) //store first Module in ModuleEntry32
+	{
+		do {
+			if (_tcscmp(ModuleEntry32.szModule, lpszModuleName) == 0) // if Found Module matches Module we look for -> done!
+			{
+				dwModuleBaseAddress = (DWORD)ModuleEntry32.modBaseAddr;
+				break;
+			}
+		} while (Module32Next(hSnapshot, &ModuleEntry32)); // go through Module entries in Snapshot and store in ModuleEntry32
+
+
+	}
+	CloseHandle(hSnapshot);
+	return dwModuleBaseAddress;
+}
 int main() {
 	//print_ps();
 	// TODO : Add memory editor
-	std::cout <<std::endl<< "Masukkan proses target:" << std::endl;
+	std::cout << "Masukkan proses target: " << std::endl;
 	std::string name;
 	getline(std::cin, name);
 	char* procName = new char[name.length()+1];
@@ -73,13 +98,75 @@ int main() {
 	//_tprintf(TEXT("%s\n"), namaApp); -->buat debug
 	DWORD id;
 	HANDLE processHandler= getProcess(namaApp,id);
+	//DWORD baseAddr;
+	LONGLONG addrMemoriTarget;
+	SIZE_T bytesRead;
+	SIZE_T bytesWrite;
+	//memset(buffer, 0x0, 100);
 	if (processHandler != NULL) {
 //		_tprintf(TEXT("%d\n"), id);
 		//cetak proses
 		_tprintf(TEXT("Proses %s ditemukan!! pid: %d\n"), namaApp, id);
+		//masukkan memori target:
+		char input_string[17];
+		std::cout << "Masukkan address target: ";
+		scanf("%s", input_string);
+		StrToInt64Ex(input_string, STIF_SUPPORT_HEX, &addrMemoriTarget);
+		_tprintf(_T("Alamat target: 0x%I64x\n"), addrMemoriTarget);
+		//baca data
+		//tentukan tipe datanya
+		std::string tipedata;
+		std::cout << "Masukkan tipe data yang ingin diubah: ";
+		std::cin >> tipedata;
+		int bytesSize=0;
+		//int bytesSize = 95;
+		//sedian buffer yg mungkin
+		//char buffer=NULL;
+
+		BOOL statusBaca = true;
+		BOOL statusTulis = true;
+		if (tipedata == "int") {
+			bytesSize = 4;
+		}
+		else if (tipedata == "char") {
+			bytesSize = 1;
+		}
+		else if (tipedata == "string") {
+			bytesSize = 256;
+			char buffer[256];
+			memset(buffer, 0x0, 100);
+			statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)buffer, bytesSize, &bytesRead);
+			if (statusBaca) {
+				_tprintf(_T("Pembacaan memori pada alamat 0x%I64x Sukses! Nilai yang dibaca: \"%s\"\n"), addrMemoriTarget, buffer);
+				_tprintf(_T("Jumlah bytes terbaca: %d\n"), bytesRead);
+			}
+			//ubah nilainya
+			std::string newStr;
+			getchar();
+			getline(std::cin, newStr);
+			char* newVal = new char[newStr.length() + 1];
+			strncpy(newVal, newStr.c_str(), newStr.length() + 1);
+			newVal[newStr.length()] = '\0';	
+			USES_CONVERSION;
+			CHAR* nilaiBaru = A2T(newVal);
+			//tulis ke memori
+			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)nilaiBaru, strlen(nilaiBaru)+1, &bytesWrite);
+			if (statusTulis) {
+				_tprintf(_T("Penulisan ke memori pada alamat 0x%I64x Sukses!\n"), addrMemoriTarget);
+				_tprintf(_T("Jumlah bytes yang ditulis: %d\n"), bytesWrite);
+			}
+		}
+		if (!statusBaca) {
+			//jika gagal
+			_tprintf(_T("Pembacaan memori pada alamat 0x%I64x gagal!\n"), addrMemoriTarget);
+		}
+		else if (!statusTulis) {
+			//jika gagal
+			_tprintf(_T("Penulisan ke memori pada alamat 0x%I64x gagal!\n"), addrMemoriTarget);
+		}
 	}
 	else {
-		_tprintf(TEXT("Proses %s tidak ditemukan!\n"), namaApp, id);
+		_tprintf(TEXT("Proses %s tidak ditemukan!\n"), namaApp);
 	}
 	//print_named_pid(name);
 	//print_ps();
