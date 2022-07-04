@@ -125,7 +125,29 @@ int main() {
 
 		BOOL statusBaca = true;
 		BOOL statusTulis = true;
-		if (tipedata == "int") {
+		if (tipedata == "string") {
+			bytesSize = 256;
+			char buffer[256];
+			memset(buffer, 0x0, 100);
+			statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)buffer, bytesSize, &bytesRead);
+			if (statusBaca) {
+				_tprintf(_T("Pembacaan memori pada alamat 0x%I64x Sukses! Nilai yang dibaca: \"%s\"\n"), addrMemoriTarget, buffer);
+				_tprintf(_T("Jumlah bytes terbaca: %d\n"), bytesRead);
+			}
+			//ubah nilainya
+			std::string newStr;
+			std::cout << "Masukkan string baru:\n";
+			getchar();
+			getline(std::cin, newStr);
+			char* newVal = new char[newStr.length() + 1];
+			strncpy(newVal, newStr.c_str(), newStr.length() + 1);
+			newVal[newStr.length()] = '\0';
+			USES_CONVERSION;
+			CHAR* nilaiBaru = A2T(newVal);
+			//tulis ke memori
+			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)nilaiBaru, strlen(nilaiBaru) + 1, &bytesWrite);
+	}
+		else if (tipedata == "int") {
 			bytesSize = 4;
 			int value;
 			statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)&value, bytesSize, &bytesRead);
@@ -141,28 +163,33 @@ int main() {
 		}
 		else if (tipedata == "char") {
 			bytesSize = 1;
-		}
-		else if (tipedata == "string") {
-			bytesSize = 256;
-			char buffer[256];
-			memset(buffer, 0x0, 100);
-			statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)buffer, bytesSize, &bytesRead);
+			char value;
+			statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)&value, bytesSize, &bytesRead);
 			if (statusBaca) {
-				_tprintf(_T("Pembacaan memori pada alamat 0x%I64x Sukses! Nilai yang dibaca: \"%s\"\n"), addrMemoriTarget, buffer);
+				_tprintf(_T("Pembacaan memori pada alamat 0x%I64x Sukses! Nilai yang dibaca: 0x%x\n"), addrMemoriTarget, value);
 				_tprintf(_T("Jumlah bytes terbaca: %d\n"), bytesRead);
 			}
 			//ubah nilainya
-			std::string newStr;
-			getchar();
-			getline(std::cin, newStr);
-			char* newVal = new char[newStr.length() + 1];
-			strncpy(newVal, newStr.c_str(), newStr.length() + 1);
-			newVal[newStr.length()] = '\0';	
-			USES_CONVERSION;
-			CHAR* nilaiBaru = A2T(newVal);
+			std::cout << "Masukkan nilai baru: ";
+			std::cin >> value;
 			//tulis ke memori
-			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)nilaiBaru, strlen(nilaiBaru)+1, &bytesWrite);
+			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)&value, sizeof(char), &bytesWrite);
 		}
+		//else if (tipedata == "float") {
+		//	bytesSize = sizeof(float);
+		//	float value;
+		//	statusBaca = ReadProcessMemory(processHandler, (LPCVOID)addrMemoriTarget, (LPVOID)&value, bytesSize, &bytesRead);
+		//	if (statusBaca) {
+		//		_tprintf(_T("Pembacaan memori pada alamat 0x%I64x Sukses! Nilai yang dibaca: 0x%x\n"), addrMemoriTarget, value);
+		//		_tprintf(_T("Jumlah bytes terbaca: %d\n"), bytesRead);
+		//	}
+		//	//ubah nilainya
+		//	std::cout << "Masukkan nilai baru: ";
+		//	std::cin >> value;
+		//	//tulis ke memori
+		//	statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)&value, sizeof(float), &bytesWrite);
+		//}
+		//yg kurang:double,wchar_t,bool,short
 		if (!statusBaca) {
 			//jika gagal
 			_tprintf(_T("Pembacaan memori pada alamat 0x%I64x gagal!\n"), addrMemoriTarget);

@@ -23,5 +23,5 @@ essmemory
 # Tabel Pengerjaan
 |          Task                |Status|
 |------------------------------|------|
-|Source code                   |      |
+|Source code                   |  V   |
 |Dokumen: eksekusi program     |      |
