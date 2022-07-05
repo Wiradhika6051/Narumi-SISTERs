@@ -24,4 +24,4 @@ essmemory
 |          Task                |Status|
 |------------------------------|------|
 |Source code                   |  V   |
-|Dokumen: eksekusi program     |      |
+|Dokumen: eksekusi program     |  V   |

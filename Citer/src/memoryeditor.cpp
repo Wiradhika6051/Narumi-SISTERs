@@ -10,6 +10,7 @@
 #pragma comment(lib, "psapi.lib")
 DWORD* getListOfProcessId(DWORD& processCount);
 DWORD GetModuleBaseAddress(TCHAR* lpszModuleName, DWORD pID);
+/*
 void print_ps_name(DWORD pid) {
 	TCHAR pname[MAX_PATH] = TEXT("<unknown>");
 	HANDLE phandle = OpenProcess(PROCESS_VM_READ, FALSE, pid);
@@ -28,7 +29,7 @@ void print_ps() {
 	for (DWORD i = 0; i < ps_ctr; i++)
 		if (ps_list[i] != 0)
 			print_ps_name(ps_list[i]);
-}
+}*/
 DWORD* getListOfProcessId(DWORD& processCount) {
 	DWORD ps_list[1024], ps_memctr;
 	if (!EnumProcesses(ps_list, sizeof(ps_list), &ps_memctr))
@@ -100,8 +101,8 @@ int main() {
 	HANDLE processHandler= getProcess(namaApp,id);
 	//DWORD baseAddr;
 	LONGLONG addrMemoriTarget;
-	SIZE_T bytesRead;
-	SIZE_T bytesWrite;
+	SIZE_T bytesRead=0;
+	SIZE_T bytesWrite=0;
 	//memset(buffer, 0x0, 100);
 	if (processHandler != NULL) {
 //		_tprintf(TEXT("%d\n"), id);
@@ -158,8 +159,9 @@ int main() {
 			//ubah nilainya
 			std::cout << "Masukkan nilai baru: ";
 			std::cin >> value;
+			getchar();
 			//tulis ke memori
-			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)&value, sizeof(int), &bytesWrite);
+			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)&value, sizeof(int), &bytesWrite);\
 		}
 		else if (tipedata == "char") {
 			bytesSize = 1;
@@ -172,6 +174,7 @@ int main() {
 			//ubah nilainya
 			std::cout << "Masukkan nilai baru: ";
 			std::cin >> value;
+			getchar();
 			//tulis ke memori
 			statusTulis = WriteProcessMemory(processHandler, (LPVOID)addrMemoriTarget, (LPVOID)&value, sizeof(char), &bytesWrite);
 		}
@@ -206,6 +209,8 @@ int main() {
 	else {
 		_tprintf(TEXT("Proses %s tidak ditemukan!\n"), namaApp);
 	}
+	std::cout << "Press any key to continue..." << std::endl;
+	getchar();
 	//print_named_pid(name);
 	//print_ps();
 	return 0;
