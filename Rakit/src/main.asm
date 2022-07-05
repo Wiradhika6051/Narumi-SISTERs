@@ -1,24 +1,29 @@
 section     .data
     STDOUT equ 1 
     STDIN equ 2
-    SUBSTITUTION db '{}' ;substr yg akan disubstitusi
+    SUBSTITUTION db '{}',0 ;substr yg akan disubstitusi
     intro     db  'Selamat datang di kripikpasta generator!',0xa,0xd ;intro message
     askTemplate db 'Masukkan path ke file berisi template copypasta: ';perintah masukkan nama file template
     lenAsk equ $ - intro
-    maxStringSize equ 100
-    maxBufferSize equ 1000
+    maxStringSize equ 200
+    maxBufferSize equ 2048
     endlText db 0xa,0xd,0x0
     lenendl equ $ - endlText
     showTemplate db 'Template yang dibaca:',0xa,0xd
     lenShowTemplate equ $ - showTemplate
     askTemplateObject db 'Masukkan objek dari template ini: '
     lenAskTemplateObject equ $ - askTemplateObject
+    ;i dw ? ;buat iterasi template
+    ;j dw ? ;buat iterasi result
 
 section .bss
     filename resb maxStringSize ;buffer ke nama dari path ke file, max 100 kbytes
     fd_in resd 1  ;file descriptor
     bufferText resb maxBufferSize
     objectName resb maxStringSize
+    result resb maxBufferSize
+    ;i resd 1
+    ;j resd 1
 
 section     .text
     global      _start
@@ -76,6 +81,11 @@ _start:
     ;mov edx,maxStringSize
     ;call print
     ;substitusi tanda SUBSTITUTION dengan nama di objectName
+    call subTemplate
+    ;cetak hasil substitus
+    mov ecx,result
+    mov edx,maxBufferSize
+    call print
     ;exit()
     mov     ebx,0
     mov     eax,1
@@ -108,6 +118,59 @@ readText:
 readFile:
   ;ebx->file descriptor
   call read
+  ret
+subTemplate:
+  ;inisialisasi i sama j
+  ;i: kounter di template, pake ecx
+  ;j: kounter di result, pake edx
+  mov ecx, bufferText
+  mov edx, result
+;inisialisasi pembacaan
+  mov esi, ecx ;baca template
+  mov edi, SUBSTITUTION ; yang mau disubstitusi
+search: ;bandingkan char
+  mov al, [di];simpan char yg diperiksa di pola substitusi
+  cmp al,0 ; kalau 0 berarti ketemu yang match
+  je match
+  ;cek apakah udah diperiksa semua di template
+  cmp byte [esi],0
+  je finish
+  ;periksa yg di template sama di pola  
+   cmp  [esi], al        
+   jne  mismatch;ada yg beda
+   inc  esi;inkremen kounter di template
+   inc  edi ;inkremen kounter di pola
+   jmp  search  ;periksa karakter berikutnya
+match:
+;ketika patternnya ketemu
+  ;simpan nilai i
+   mov  ecx, esi           
+   dec  ecx              
+   mov  edi, objectName ;assignedi dengan karakter di objectName
+replace:
+   mov  al, [di]  ;simpan karakter esi objectName
+   cmp  al, 0  ;periksa apakah sudah disubstitusi semua?
+   je   next ; kalau iya, lanjut ke pemeriksaan di template
+   mov  esi, edx  ;assign esi dengan nilai indeks j di result
+   mov  [esi], al  ;salin nilai di al di posisi yang tepat di result
+   inc  edx  ;inkemren j
+   inc  edi;inkremen kounter objectName
+   jmp  replace;ulangi proses replace
+mismatch:    
+;kalau ada yg gak pas, ya..periksa next char di template dan ulangi pattern
+   mov  esi, ecx ;assign esi dengan indeks di template
+   mov  edi, edx ;assign di dengan indeks di result
+   mov  al, [esi] ;pindahin karakter di template ke al
+   mov  [di], al  ;pindahin karakter dari al ke result
+   inc  edx ;inkremen  indeks di result
+next:
+   mov  edi, SUBSTITUTION ;periksa karakter selanjutnya di template. reset pembacaan pattern
+   inc  ecx  ;inkremen kounter di template
+;periksa lagi apakah next char nya merupakan karakter terakhir di template
+   mov  esi, ecx ;assign esi dengan indeks di template
+   cmp  byte [esi], 0 ;bandingkan nilai di indeks i, apakah \0?
+   jne  search ; kalo bukan lanjutkan pencarian
+finish:
   ret
 
 ;template/wangy_wangy.txt
