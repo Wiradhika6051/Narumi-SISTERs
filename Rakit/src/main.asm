@@ -1,36 +1,36 @@
 section     .data
     STDOUT equ 1 
     STDIN equ 2
+    SUBSTITUTION db '{}' ;substr yg akan disubstitusi
     intro     db  'Selamat datang di kripikpasta generator!',0xa,0xd ;intro message
-    askTemplate db 'Masukkan path ke file berisi template copypasta:',0xa,0xd;perintah masukkan nama file template
+    askTemplate db 'Masukkan path ke file berisi template copypasta: ';perintah masukkan nama file template
     lenAsk equ $ - intro
     maxStringSize equ 100
     maxBufferSize equ 1000
+    endlText db 0xa,0xd,0x0
+    lenendl equ $ - endlText
+    showTemplate db 'Template yang dibaca:',0xa,0xd
+    lenShowTemplate equ $ - showTemplate
+    askTemplateObject db 'Masukkan objek dari template ini: '
+    lenAskTemplateObject equ $ - askTemplateObject
 
 section .bss
     filename resb maxStringSize ;buffer ke nama dari path ke file, max 100 kbytes
     fd_in resd 1  ;file descriptor
-    bufferText resb 1000
+    bufferText resb maxBufferSize
+    objectName resb maxStringSize
 
 section     .text
     global      _start
 _start:
     ;print selamat datang dan meminta nama template
-    mov edx, lenAsk ;panjang string yang ingin dicetak
-    mov ecx, intro ;string yang ingin dicetak
-    mov ebx,STDOUT ;output place, 1 = stdout
-    mov eax,4;interupt number ( 4= nyetak string)
-    int 0x80;panggil interrupt
-    ;syscall buat baca nama file
-    ;mov edx,100 ;maxsize
-    mov eax,3   
-    mov ebx,STDIN 
+    mov edx, lenAsk 
+    mov ecx, intro 
+    call print
+    ;baca nama file
     mov ecx,filename
     mov edx,maxStringSize
-    int 0x80
-    ;cari panjang string
-    ;mov ecx,filename;
-    ;call strlen;
+    call readText
     ;tambahin \0 di akhir string yang dibaca
     mov byte [ecx+eax-1], 0
     ;open file
@@ -41,55 +41,76 @@ _start:
     int 0x80
     ;simpan file descriptor
     mov [fd_in], eax
-    ;baca file syscall read()
-    mov eax,3
+    ;baca isi file
     mov ebx, [fd_in]
     mov ecx, bufferText
     mov edx,maxBufferSize
-    int 0x80
+    call readFile
     ;tutup file
     mov eax,6
     mov ebx, [fd_in]
     int 0x80
+    ;kasih garis kosong sebelum nampilin template
+    call endl
+    ;tampilin template:
+    mov ecx, showTemplate
+    mov edx, lenShowTemplate
+    call print
     ;cetak templet
-    mov eax,4
-    mov ebx,STDOUT
     mov ecx,bufferText
     mov edx,maxBufferSize
-    int 0x80
-    ;mov edx,5
-    ;mov ecx, filename ; nama file yang ingin dibaca
-    ;mov ecx,num
-    ;mov ebx,STDIN
-    ;mov eax,3 ; sys_read
-    ;int 0x80
-    ;kasih null terminated ke string
-   ; mov ebx,filename
-    ;add ebx,ecx
-    ;add ebx,eax
-  ;  sub ebx, 1
-  ;  mov byte [ebx],0 ; ecx-> buffer, eax->length read
-  ;  xor ebx,ebx;bersihin register
-
-    ;debug
-    ;cetak hasilnya
-    ;mov edx, maxStringSize ;panjang string yang ingin dicetak
-    ;mov ecx, filename ;string yang ingin dicetak
-    ;mov ebx,STDOUT ;output place, 1 = stdout
-    ;mov eax,4;interupt number ( 4= nyetak string)
-    ;int 0x80;panggil interrupt
-  ;  add eax,1
-  ;  mov edx, eax ;panjang string yang ingin dicetak
-   ; mov ecx, filename ;string yang ingin dicetak
-    ;mov ebx,STDOUT ;output place
-    ;mov eax,4;interupt number ( 4= nyetak string)
-    ;int 0x80;panggil interrupt
+    call print
+    ;pindah ke garis baru
+    call endl
+    call endl
+    ;minta masukkan karakter yang dijadiin objek template
+    mov ecx,askTemplateObject
+    mov edx,lenAskTemplateObject
+    call print
+    ;minta masukan
+    mov ecx, objectName
+    mov edx,maxStringSize
+    call readText
+    ;debug, cetak namanya
+    ;    mov ecx, objectName
+    ;mov edx,maxStringSize
+    ;call print
+    ;substitusi tanda SUBSTITUTION dengan nama di objectName
     ;exit()
     mov     ebx,0
     mov     eax,1
     int     0x80
 
+endl:
+  mov ecx,endlText
+  mov edx, lenendl
+  call print
+  ret
 
+print:
+  ;edx ->panjang string yang ingin dicetak
+  ;ecx->string yang ingin dicetak
+  mov eax, 4;syscall number
+  mov ebx, STDOUT; tempat nyetak
+  int 0x80;buat syscall
+  ret
+read:
+  ;edx->jumlah yang pingin dibaca
+  ;ecx->buffer tempat nyimpan yang dibaca
+  ;ebx->sumber bacaan
+  mov eax,3
+  int 0x80
+  ret
+readText:
+  mov ebx, STDIN
+  call read
+  ret
+readFile:
+  ;ebx->file descriptor
+  call read
+  ret
+
+;template/wangy_wangy.txt
 ;strlen:
 ;  ;nyari panjang string
 ;  push ecx
