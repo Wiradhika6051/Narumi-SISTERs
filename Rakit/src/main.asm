@@ -76,6 +76,8 @@ _start:
     mov ecx, objectName
     mov edx,maxStringSize
     call readText
+    ;tambahin \0
+    mov byte [ecx+eax-1], 0
     ;debug, cetak namanya
     ;    mov ecx, objectName
     ;mov edx,maxStringSize
@@ -86,6 +88,8 @@ _start:
     mov ecx,result
     mov edx,maxBufferSize
     call print
+    ;cetak endl
+    call endl
     ;exit()
     mov     ebx,0
     mov     eax,1
@@ -129,11 +133,11 @@ subTemplate:
   mov esi, ecx ;baca template
   mov edi, SUBSTITUTION ; yang mau disubstitusi
 search: ;bandingkan char
-  mov al, [di];simpan char yg diperiksa di pola substitusi
+  mov al, [edi];simpan char yg diperiksa di pola substitusi
   cmp al,0 ; kalau 0 berarti ketemu yang match
   je match
   ;cek apakah udah diperiksa semua di template
-  cmp byte [esi],0
+  cmp BYTE [esi],0
   je finish
   ;periksa yg di template sama di pola  
    cmp  [esi], al        
@@ -148,11 +152,11 @@ match:
    dec  ecx              
    mov  edi, objectName ;assignedi dengan karakter di objectName
 replace:
-   mov  al, [di]  ;simpan karakter esi objectName
-   cmp  al, 0  ;periksa apakah sudah disubstitusi semua?
+   mov eax, [edi]  ;simpan karakter esi objectName
+   cmp  eax, 0  ;periksa apakah sudah disubstitusi semua?
    je   next ; kalau iya, lanjut ke pemeriksaan di template
    mov  esi, edx  ;assign esi dengan nilai indeks j di result
-   mov  [esi], al  ;salin nilai di al di posisi yang tepat di result
+   mov  [esi], eax  ;salin nilai di al di posisi yang tepat di result
    inc  edx  ;inkemren j
    inc  edi;inkremen kounter objectName
    jmp  replace;ulangi proses replace
@@ -160,8 +164,8 @@ mismatch:
 ;kalau ada yg gak pas, ya..periksa next char di template dan ulangi pattern
    mov  esi, ecx ;assign esi dengan indeks di template
    mov  edi, edx ;assign di dengan indeks di result
-   mov  al, [esi] ;pindahin karakter di template ke al
-   mov  [di], al  ;pindahin karakter dari al ke result
+   mov  eax, [esi] ;pindahin karakter di template ke al
+   mov  [edi], eax  ;pindahin karakter dari al ke result
    inc  edx ;inkremen  indeks di result
 next:
    mov  edi, SUBSTITUTION ;periksa karakter selanjutnya di template. reset pembacaan pattern
