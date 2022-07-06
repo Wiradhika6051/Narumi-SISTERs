@@ -18,9 +18,9 @@ Buatlah sebuah program atau permainan sederhana dengan menggunakan asm x86. Prog
 # Tabel Pengerjaan
 |          Task                |Status|
 |------------------------------|------|
-|I/O program                   |      |
-|bonus:File I/O                |      |
+|I/O program                   |   V  |
+|bonus:File I/O                |   V  |
 |bonus:arsitektur selain x86   |      |
-|Berkas:Source Code            |      |
-|Berkas:dokumen:cara eksekusi  |      |
-|Berkas:dokumen:penjelasan     |      |
+|Berkas:Source Code            |   V  |
+|Berkas:dokumen:cara eksekusi  |   V  |
+|Berkas:dokumen:penjelasan     |   V  |

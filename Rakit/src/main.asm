@@ -58,10 +58,15 @@ _start:
     mov ecx, bufferText
     mov edx,maxBufferSize
     call readFile
+    ;simpan panjang yang dibaca
+    mov esi,eax
     ;tutup file
     mov eax,6
     mov ebx, [fd_in]
     int 0x80
+    ;bila yang dibaca kosong langsung exit  
+    cmp esi,0
+    je exit
     ;kasih garis kosong sebelum nampilin template
     call endl
     ;tampilin template:
