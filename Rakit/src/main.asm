@@ -13,15 +13,22 @@ section     .data
     lenShowTemplate equ $ - showTemplate
     askTemplateObject db 'Masukkan objek dari template ini: '
     lenAskTemplateObject equ $ - askTemplateObject
+    askOutFile db 'Masukkan path ke file tujuan: '
+    lenAskOutFile equ $ - askOutFile
+    done db 'Copypasta sudah disimpan!',0xa,0xd
+    lenDone equ $ - done
+    result times maxBufferSize db 0x0
     ;i dw ? ;buat iterasi template
     ;j dw ? ;buat iterasi result
 
 section .bss
     filename resb maxStringSize ;buffer ke nama dari path ke file, max 100 kbytes
     fd_in resd 1  ;file descriptor
+    fd_out resd 1
     bufferText resb maxBufferSize
     objectName resb maxStringSize
-    result resb maxBufferSize
+    confirmation resb 1
+    outFileName resb maxStringSize
     ;i resd 1
     ;j resd 1
 
@@ -90,7 +97,27 @@ _start:
     call print
     ;cetak endl
     call endl
+    call endl
+    ;minta nama file
+    mov ecx,askOutFile
+    mov edx,lenAskOutFile
+    call print
+    ;baca nama file
+    mov ecx,outFileName
+    mov edx,maxStringSize
+    call readText
+    ;tambahin \0
+    mov byte [ecx+eax-1], 0
+    ;tentuin panjang buffer
+    mov ecx, result
+    call strlen
+    ;tulis ke file
+    mov ebx, outFileName
+    mov ecx, result
+    call writeFile
     ;exit()
+    ;tampilin pesan sudah
+  exit:
     mov     ebx,0
     mov     eax,1
     int     0x80
@@ -107,6 +134,28 @@ print:
   mov eax, 4;syscall number
   mov ebx, STDOUT; tempat nyetak
   int 0x80;buat syscall
+  ret
+writeFile:
+  ;eax ->panjang buffer
+  ;ebx->nama file
+  ;ecx->pointer ke buffer file'
+  ;buat filenya dulu(syscall num 8)
+  mov esi, eax
+  mov edi, ecx
+  mov eax, 8
+  mov ecx,0777
+  int 0x80
+  ;dapetin file handler
+  mov [fd_out],eax
+  ;tulis ke file
+  mov eax, 4
+  mov ebx, [fd_out]
+  mov ecx,edi
+  mov edx,esi
+  int 0x80
+  ;tutup file
+  mov eax,6
+  mov ebx,[fd_out]
   ret
 read:
   ;edx->jumlah yang pingin dibaca
@@ -177,18 +226,17 @@ next:
 finish:
   ret
 
-;template/wangy_wangy.txt
-;strlen:
-;  ;nyari panjang string
-;  push ecx
-;  dec ecx
-;  .loop:
-;    inc ecx
-;    cmp byte [ecx],0
-;    jne .loop
-;    ;hitung panjangnya
-;    pop eax
-;    sub ecx,eax
-;    mov eax,ecx
-;    ret
-;    ;return panjangnya di eax
+strlen:
+  ;nyari panjang string
+  ;ecx->buffer
+  mov esi, ecx
+  dec ecx
+  .loop:
+    inc ecx
+    cmp byte [ecx],0
+    jne .loop
+    ;hitung panjangnya
+    mov eax,ecx
+    sub eax,esi
+    ret
+    ;return panjangnya di eax
